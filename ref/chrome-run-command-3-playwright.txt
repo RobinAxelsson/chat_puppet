@@ -1,0 +1,58 @@
+C:\Users\axels\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe
+--disable-field-trial-config                             # Avoids experimental behavior from A/B testing frameworks
+--disable-background-networking                          # Prevents background data fetches that could interfere with tests
+--disable-background-timer-throttling                    # Ensures consistent timer behavior, even when tabs are backgrounded
+--disable-backgrounding-occluded-windows                 # Prevents rendering throttling in obscured windows, important for visual tests
+--disable-back-forward-cache                             # Disables fast history navigation cache to avoid unexpected state restoration
+--disable-breakpad                                       # Disables crash reporting dialog pop-ups during test runs
+--disable-client-side-phishing-detection                 # Removes unnecessary delays from SafeBrowsing in test environments
+--disable-component-extensions-with-background-pages     # Blocks extensions from creating background pages that could affect isolation
+--disable-component-update                               # Prevents automatic updates during test execution, ensuring test consistency
+--no-default-browser-check                               # Skips the "set as default browser" prompt, which blocks automation
+--disable-default-apps                                   # Prevents Chrome default apps from loading and interfering with tests
+--disable-dev-shm-usage                                  # Workaround for environments with small /dev/shm (like Docker/CI)
+--disable-extensions                                     # Ensures a clean slate by disabling all browser extensions
+
+# Disabled browser features to ensure deterministic behavior and avoid unwanted UI or logic during tests
+--disable-features=^
+  AcceptCHFrame,^                                        # Avoids sending client hints that could change server responses
+  AutoExpandDetailsElement,^                             # Prevents automatic UI behavior that might interfere with DOM state validation
+  AvoidUnnecessaryBeforeUnloadCheckSync,^                # Keeps unload behavior predictable across test runs
+  CertificateTransparencyComponentUpdater,^              # Prevents background certificate updates that could vary test behavior
+  DeferRendererTasksAfterInput,^                         # Disables task deferral to avoid UI lag or delay artifacts
+  DestroyProfileOnBrowserClose,^                         # Retains profile data after browser exit for debugging failed tests
+  DialMediaRouteProvider,^                               # Disables media routing features (e.g., Chromecast) that clutter test logs
+  ExtensionManifestV2Disabled,^                          # Keeps legacy extension support to prevent crashes in test environments
+  GlobalMediaControls,^                                  # Removes media overlay controls that can interfere with UI
+  HttpsUpgrades,^                                        # Disables automatic HTTP→HTTPS redirects that break local or mock servers
+  ImprovedCookieControls,^                               # Prevents cookie restrictions from impacting test login or state flows
+  LazyFrameLoading,^                                     # Ensures all frames load immediately, critical for layout and timing-sensitive tests
+  LensOverlay,^                                          # Disables experimental lens search overlays that could obscure the UI
+  MediaRouter,^                                          # Turns off media device routing UI that’s irrelevant for test scenarios
+  PaintHolding,^                                         # Avoids paint deferral for faster and more deterministic rendering
+  ThirdPartyStoragePartitioning,^                        # Prevents storage isolation that could block cross-origin tests
+  Translate                                               # Prevents language translation prompts from interfering with test content
+
+--allow-pre-commit-input                                 # Enables typing/input before the page is fully rendered (speeds up automation)
+--disable-hang-monitor                                   # Prevents Playwright from triggering timeouts due to long tasks
+--disable-ipc-flooding-protection                        # Allows rapid-fire commands from automation tools without throttling
+--disable-popup-blocking                                 # Allows JavaScript popups to open during test cases
+--disable-prompt-on-repost                               # Suppresses reload confirmation dialogs for form submissions
+--disable-renderer-backgrounding                         # Keeps renderers active in background tabs to avoid timing issues
+--force-color-profile=srgb                               # Ensures color rendering is consistent across devices/environments
+--metrics-recording-only                                 # Disables reporting while still collecting metrics for test inspection
+--no-first-run                                           # Skips initial setup wizards to start Chrome cleanly
+--password-store=basic                                   # Avoids triggering system keychain popups during login form tests
+--use-mock-keychain                                      # Prevents OS-level password save prompts from appearing
+--no-service-autorun                                     # Stops any background Chrome services from starting automatically
+--export-tagged-pdf                                      # Enables support for PDF export testing
+--disable-search-engine-choice-screen                    # Skips the regional search engine prompt during startup
+--unsafely-disable-devtools-self-xss-warnings            # Allows DevTools evaluation without XSS blocking (for automation tools)
+--no-sandbox                                             # Required in many CI environments where sandboxing breaks
+--app=data:text/html,                                    # Launches browser in app mode with an embedded blank page
+--window-size=600,600                                    # Consistent window size for layout and visual regression testing
+--window-position=1020,10                                # Ensures the window appears in a predictable screen location
+--test-type=                                             # Placeholder required by some testing contexts (usually ignored)
+--user-data-dir=C:\Users\axels\AppData\Local\Temp\playwright_chromiumdev_profile-46Sv0d   # Dedicated temp profile to isolate session data
+--remote-debugging-pipe                                  # Uses Node IPC to communicate with Chromium (not sniffable on the network)
+about:blank                                              # Loads a minimal blank page to start cleanly

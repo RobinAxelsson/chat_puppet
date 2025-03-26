@@ -1,0 +1,52 @@
+C:\Users\axels\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe
+--disable-field-trial-config                             # Avoids unpredictable behavior from A/B experiments
+--disable-background-networking                          # Ensures no background network traffic interferes with tests
+--disable-background-timer-throttling                    # Keeps all timers running normally for reliable timing in automation
+--disable-backgrounding-occluded-windows                 # Prevents throttling in hidden windows that may break tests
+--disable-back-forward-cache                             # Disables page caching to avoid state inconsistencies during navigation tests
+--disable-breakpad                                       # Prevents crash report dialogs that interrupt automation
+--disable-client-side-phishing-detection                 # Speeds up page loads by skipping unnecessary checks for test environments
+--disable-component-extensions-with-background-pages     # Prevents unexpected background activity from internal extensions
+--disable-component-update                               # Freezes the environment by preventing auto-updates during test runs
+--no-default-browser-check                               # Avoids unnecessary system prompts that can block automation
+--disable-default-apps                                   # Prevents default Chrome apps from loading and affecting startup
+--disable-dev-shm-usage                                  # Improves compatibility in CI/docker environments with limited shared memory
+--disable-extensions                                     # Eliminates external extension interference with tests
+--disable-features=                                      # Disables features that could introduce non-determinism or unwanted UI behavior
+  AcceptCHFrame,                                         # Prevents unexpected content hints affecting requests
+  AutoExpandDetailsElement,                              # Avoids automatic UI behavior that might affect DOM state
+  AvoidUnnecessaryBeforeUnloadCheckSync,                 # Keeps unload behavior consistent across test runs
+  CertificateTransparencyComponentUpdater,               # Skips background cert updates to avoid flakiness
+  DeferRendererTasksAfterInput,                          # Keeps render behavior immediate for timing-sensitive tests
+  DestroyProfileOnBrowserClose,                          # Preserves profile for debugging instead of wiping it
+  DialMediaRouteProvider,                                # Disables media routing UI that’s not needed for automation
+  ExtensionManifestV2Disabled,                           # Prevents extension compatibility issues during testing
+  GlobalMediaControls,                                   # Avoids UI overlays that can interfere with visual tests
+  HttpsUpgrades,                                         # Disables auto-redirects to HTTPS that may break mock servers
+  ImprovedCookieControls,                                # Keeps cookie behavior simple and predictable
+  LazyFrameLoading,                                      # Ensures all frames load immediately for complete DOM access
+  LensOverlay,                                           # Avoids UI clutter from new experimental features
+  MediaRouter,                                           # Disables cast/device detection UI not needed for tests
+  PaintHolding,                                          # Prevents delayed rendering which can affect visual test timing
+  ThirdPartyStoragePartitioning,                         # Avoids storage isolation that could break test scenarios
+  Translate                                               # Prevents unwanted translation prompts in non-English pages
+--allow-pre-commit-input                                 # Allows early interaction to reduce delays in input simulation
+--disable-hang-monitor                                   # Prevents Chromium from force-killing slow test scripts
+--disable-ipc-flooding-protection                        # Allows high-volume message passing during fast automation
+--disable-popup-blocking                                 # Ensures test-triggered popups aren’t blocked by default
+--disable-prompt-on-repost                               # Skips reload prompts to allow smoother test navigation
+--disable-renderer-backgrounding                         # Keeps rendering active in all tabs to avoid flickering or missed elements
+--force-color-profile=srgb                               # Forces color consistency across systems for visual testing
+--metrics-recording-only                                 # Prevents usage reporting, keeping test runs clean and private
+--no-first-run                                           # Skips setup flows for a faster and clean browser start
+--enable-automation                                      # Marks browser as automated to enable devtools and skip prompts
+--password-store=basic                                   # Avoids system password prompts that block test flow
+--use-mock-keychain                                      # Skips OS-level auth popups in CI environments
+--no-service-autorun                                     # Prevents background services from launching and affecting performance
+--export-tagged-pdf                                      # Enables PDF export functionality for automation tests
+--disable-search-engine-choice-screen                    # Skips the region-based engine selection popup
+--unsafely-disable-devtools-self-xss-warnings            # Lets devtools execute scripts without annoying XSS warnings in automation
+--no-sandbox                                             # Required in many CI environments where sandboxing breaks Chromium
+--user-data-dir=C:\Users\axels\AppData\Local\Temp\playwright_chromiumdev_profile-LbJeKa   # Isolates profile data per test run for consistency
+--remote-debugging-pipe                                  # Allows direct protocol control via pipe (used by Playwright)
+--no-startup-window                                      # Runs Chrome in background mode to simulate headless behavior

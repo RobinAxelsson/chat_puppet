@@ -1,0 +1,35 @@
+
+## Required
+--remote-debugging-port=9222          # Enables CDP over WebSocket (required for manual automation/debugging)
+--no-first-run                        # Skips first-run setup (important for clean startup)
+--no-default-browser-check            # Avoids the “set as default” prompt
+--disable-popup-blocking              # Allows window.open() popups (important for automation)
+--disable-background-networking       # Prevents telemetry and background connections
+--disable-hang-monitor                # Avoids unintentional timeouts from long tasks
+
+## Clean environment
+--disable-default-apps                # Don’t load bundled Chrome apps (e.g., Docs, YouTube)
+--disable-extensions                  # Prevent extensions from interfering with automation
+--disable-component-update            # Disables automatic updating of browser components
+--metrics-recording-only              # Collects metrics without reporting anything
+--password-store=basic                # Avoids OS keychain prompts
+--use-mock-keychain                   # Prevents system password dialogs
+--disable-client-side-phishing-detection  # Avoids SafeBrowsing logic during test loads
+
+## Consistency & Determinism
+--disable-renderer-backgrounding      # Ensures background tabs keep rendering
+--disable-background-timer-throttling # Timers fire at full speed even in background
+--disable-backgrounding-occluded-windows  # Prevent throttling when a window is hidden
+--force-color-profile=srgb            # Ensures consistent color rendering
+--disable-features=LazyFrameLoading,PaintHolding,HttpsUpgrades,GlobalMediaControls  # Disables features that introduce variability
+
+## Simplified UI / Visual Testing
+--window-size=1280,720                # Set a consistent viewport size
+--app=data:text/html,                 # Launches in app mode (no tabs/address bar)
+--no-sandbox                          # Required in many CI or containerized environments
+
+## Optional / Advanced Debugging
+--enable-automation                   # Identifies Chrome as controlled by automation
+--remote-allow-origins=*              # Needed for tools connecting from arbitrary origins (in newer Chrome)
+--disable-ipc-flooding-protection     # Allows heavy scripting without artificial throttling
+--disable-prompt-on-repost            # Avoids form resubmission popups

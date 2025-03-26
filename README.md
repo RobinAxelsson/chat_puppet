@@ -1,48 +1,29 @@
-# chat_puppet
+# chat-puppet
 
-## Playwright API
+This project is a combination of web scraping, chrome dev tools automation with playwright and chat gpt interaction - se demo below.
 
-```csharp
-//Chaining & Scoping - recommended
-var form = page.Locator("form");
-await form.Locator("input[type='text']").FillAsync("Name");
-await form.Locator("button:has-text('Submit')").ClickAsync();
+## Tools & Tech
 
-//css selectors - recommended
-await page.ClickAsync("button");
-await page.FillAsync("input[name='email']", "you@example.com");
-await page.CheckAsync("input[type='checkbox']");
-await page.ClickAsync("form > div > button.submit");
+- Playwright
+- Node
+- JavaScript
+- Chrome browser
+- ChatGPT account and home page
 
+## Setup
 
-await page.Locator("section:has(h2:has-text('Details')) input").FillAsync("Details...");
+```shell
+# 1. run your chromium browser with remote debugging port
+chrome.exe --no-default-browser-check --remote-debugging-port=9222
 
-//pseudo-classes
-await page.ClickAsync("ul > li:nth-of-type(2)");
-await page.ClickAsync("input:checked");
+# 2. login to ChatGpt
+# 3. Choose the chat you want to use or new chat
+# 4. run the command with node or a custom wrapper script
+<cmd> <prompt>
+# or pipe to standard in
+<prompt> | <cmd>
 
-//visible content
-await page.ClickAsync("text=Submit");
-await page.ClickAsync("text='I agree'");
-await page.ClickAsync("button:has-text('Save')"); //has text gives case sensitive
-
-//Semantic roles, great for accessibility testing
-await page.GetByRole(AriaRole.Button, new() { Name = "Submit" }).ClickAsync();
-await page.GetByRole(AriaRole.Checkbox, new() { Name = "Subscribe" }).CheckAsync();
-
-//XPath selectors - avoid
-await page.ClickAsync("//button[text()='Submit']");
-await page.FillAsync("//input[@name='email']", "x@example.com");
-
-//Advanced combinators
-await page.ClickAsync("div:has(button)"); //:has() – like "parent of something"
-await page.ClickAsync("li:has-text('John'):has(button)");
-await page.ClickAsync("table tr:nth-of-type(3) td:nth-of-type(2)");
-
-//other
-page.GetByLabel("Email");
-page.GetByPlaceholder("Enter your name");
-page.GetByText("Submit");
-page.GetByTitle("Close");
-page.GetByAltText("Logo");
 ```
+
+## Demo
+![demo-chat-puppet](/doc/img/demo-chat-puppet.gif)

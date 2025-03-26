@@ -1,0 +1,12 @@
+C:\Users\axels\AppData\Local\ms-playwright\chromium-1161\chrome-win\chrome.exe
+--type=crashpad-handler                                # Tells Chromium to act as the crashpad handler process
+--user-data-dir=...                                    # Shared user profile between browser and crashpad
+/prefetch:4                                            # Windows optimization hint
+--monitor-self                                         # Self-monitors and can restart if killed
+--monitor-self-argument=...                            # Arguments used to re-launch itself if needed
+--monitor-self-annotation=ptype=crashpad-handler       # Metadata about this process
+--database=...                                         # Where crash dumps are stored
+--annotation=plat=Win64                                # OS info
+--annotation=prod=Chromium                             # Product tag
+--annotation=ver=134.0.6998.35                         # Chromium version
+--initial-client-data=...                              # Memory addresses for crash context (platform specific)

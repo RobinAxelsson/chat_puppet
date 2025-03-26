@@ -1,0 +1,14 @@
+{
+  "name": "chat_puppet",
+  "version": "1.0.0",
+  "description": "```csharp\r //Chaining & Scoping - recommended\r var form = page.Locator(\"form\");\r await form.Locator(\"input[type='text']\").FillAsync(\"Name\");\r await form.Locator(\"button:has-text('Submit')\").ClickAsync();",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.51.1",
+    "@types/node": "^22.13.13"
+  }
+}
