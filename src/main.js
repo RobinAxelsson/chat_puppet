@@ -6,140 +6,143 @@ const { chromium } = require('playwright');
 
 (async () => {
     var prompt = await getValidPromptFromInput();
-    // var prompt = "What is the meaning of life?";
     const { page, browser } = await connectToChatGpt();
-    await promptChatGpt(page, prompt);
+    
+    // the div[data-message-author-role="assistant"] elements are the chat responses
+    // we count them to know when a new response is added after we send the prompt
+    const initialResponseDivCount = await getInitialResponseDivCount(page);
+    await typePromptIntoChatGptAndPressEnter(prompt, page);
+    const newResponseDiv = await waitForNewResponseDiv(initialResponseDivCount, page);
+    await printResponseTextToConsoleAlongWithChatGpt(newResponseDiv, page);
     await browser.close();
+})();
 
-    // Helper functions //
-    async function getValidPromptFromInput() {
-        const args = process.argv.slice(2); // skip "node" and filename
+async function getValidPromptFromInput() {
+    const args = process.argv.slice(2); // skip "node" and filename
 
-        const showHelp = args.includes('--help') || args.includes('-h');
-        const hasPromptArg = args.length > 0;
-        const isPiped = !process.stdin.isTTY;
+    const showHelp = args.includes('--help') || args.includes('-h');
+    const hasPromptArg = args.length > 0;
+    const isPiped = !process.stdin.isTTY;
 
-        if (showHelp || (!hasPromptArg && !isPiped)) {
-            console.log(`
-                Usage:
-                  chat "Your prompt here"
-                  echo "Prompt via stdin" | chat
-                
-                Options:
-                  -h, --help    Show this help message
-                `);
-            process.exit(0);
-        }
-
-        if (hasPromptArg) {
-            return args.join(' ');
-        }
-
-        process.stdin.setEncoding('utf8');
-        let input = '';
-        for await (const chunk of process.stdin) {
-            input += chunk;
-        }
-
-        if (!input.trim()) {
-            throw new Error('No input provided via stdin.');
-        }
-
-        return input.trim();
+    if (showHelp || (!hasPromptArg && !isPiped)) {
+        console.log(`
+            Usage:
+              chat "Your prompt here"
+              echo "Prompt via stdin" | chat
+            
+            Options:
+              -h, --help    Show this help message
+            `);
+        process.exit(0);
     }
 
-    async function connectToChatGpt() {
-        const browser = await chromium.connectOverCDP('http://localhost:9222');
-
-        const context = browser.contexts()[0];
-        if (!context) throw new Error('No existing browser context found.');
-
-        const pages = context.pages();
-        if (pages.length === 0) throw new Error('No pages found in existing context.');
-
-        const page = pages.find(p => p.url().includes('https://chatgpt.com'));
-        if (!page) throw new Error('No ChatGPT page found.');
-        return { page, browser };
+    if (hasPromptArg) {
+        return args.join(' ');
     }
 
-    async function promptChatGpt(page, prompt) {
-        await page.waitForTimeout(1000);
-        // count the old prompts before sending the new prompt
-        const initialChatElementCount = await page.locator('div[data-message-author-role="assistant"]').count();
+    process.stdin.setEncoding('utf8');
+    let input = '';
+    for await (const chunk of process.stdin) {
+        input += chunk;
+    }
 
-        if (typeof initialChatElementCount !== 'number' || isNaN(initialChatElementCount)) {
-            throw new Error('Ther should be a number here.');
+    if (!input.trim()) {
+        throw new Error('No input provided via stdin.');
+    }
+
+    return input.trim();
+}
+
+async function connectToChatGpt() {
+    const browser = await chromium.connectOverCDP('http://localhost:9222');
+
+    const context = browser.contexts()[0];
+    if (!context) throw new Error('No existing browser context found.');
+
+    const pages = context.pages();
+    if (pages.length === 0) throw new Error('No pages found in existing context.');
+
+    const page = pages.find(p => p.url().includes('https://chatgpt.com'));
+    if (!page) throw new Error('No ChatGPT page found.');
+    return { page, browser };
+}
+
+async function getInitialResponseDivCount(page) {
+    const initialResponseDivCount = await page.locator('div[data-message-author-role="assistant"]').count();
+
+    if (typeof initialResponseDivCount !== 'number' || isNaN(initialResponseDivCount) || initialResponseDivCount < 0) {
+        throw new Error('initialChatElementCount should be zero or a positive number but got: ' + initialResponseDivCount);
+    }
+    return initialResponseDivCount;
+}
+
+async function typePromptIntoChatGptAndPressEnter(prompt, page) {
+    const promptDiv = await page.locator('#prompt-textarea');
+    await promptDiv.click();
+    await page.keyboard.type(prompt, { delay: 10 });
+    await page.keyboard.press('Enter');
+}
+
+async function waitForNewResponseDiv(initialResponseDivCount, page) {
+    let currentResponseDivs = null;
+    let currentResponseDivCount = 0;
+    let retrys = 0;
+    for (; ;) {
+        await page.waitForTimeout(500);
+        currentResponseDivs = page.locator('div[data-message-author-role="assistant"]');
+        currentResponseDivCount = await currentResponseDivs.count();
+
+        if (currentResponseDivCount > initialResponseDivCount)
+            break;
+
+        retrys++;
+        if (retrys > 3)
+            throw new Error('No new "div[data-message-author-role="assistant"]" found. initialChatElementCount: ' + initialResponseDivCount + ' currentChatElementCount: ' + currentResponseDivCount);
+    }
+
+    if (currentResponseDivs === null)
+        throw new Error('Failed locating currentChatElements - div[data-message-author-role="assistant"], currentChatElements was null.');
+
+    const newResponseDiv = currentResponseDivs.nth(currentResponseDivCount - 1);
+
+    if (!newResponseDiv)
+        throw new Error('No assistant element found.');
+    return newResponseDiv;
+}
+
+async function printResponseTextToConsoleAlongWithChatGpt(newResponseDiv, page) {
+    let chatResponse = '';
+    let chrPtr = 0;
+    retrys = 0;
+
+    for (; ;) {
+        // If we caught up typing with chatGPT, the cases are:
+        // - We have not started typing the response yet
+        // - ChatGPT has taken a pause and we should wait for the next response
+        // - The response is fully printed
+        let caughtUpWithResponse = chatResponse.length === chrPtr;
+
+        if (!caughtUpWithResponse) {
+            retrys = 0;
         }
 
-        // type the new prompt in the input field (of the current chat session)
-        const promptDiv = await page.locator('#prompt-textarea');
-        await promptDiv.click();
-        await page.keyboard.type(prompt, { delay: 50 });
-        await page.keyboard.press('Enter');
-
-        // Wait for a new assistant element to appear
-        let currentChatElements = null;
-        let currentChatElementCount = 0;
-        while (true) {
-            await page.waitForTimeout(500);
-            currentChatElements = page.locator('div[data-message-author-role="assistant"]');
-
-            currentChatElementCount = await currentChatElements.count();
-
-            if (currentChatElementCount < 1)
-                throw new Error('No assistants found.');
-
-            if (currentChatElementCount > initialChatElementCount) break;
+        if (caughtUpWithResponse && retrys > 10) {
+            break;
         }
 
-        if (currentChatElements === null)
-            throw new Error('No assistant elements found.');
-
-        const newAssistantElement = currentChatElements.nth(currentChatElementCount - 1);
-
-        if (!newAssistantElement)
-            throw new Error('No assistant element found.');
-
-        // Wait for some inner text to appear in the assistant element
-        let chatResponse = '';
-        while (true) {
-            chatResponse = await newAssistantElement.innerText();
-            if (chatResponse.length > 10) break;
+        if (caughtUpWithResponse) {
+            retrys++;
             await page.waitForTimeout(1000);
         }
 
-        if (chatResponse.length === 0)
-            throw new Error('No text found in assistant element.');
+        chatResponse = await newResponseDiv.innerText();
+        let newLength = chatResponse.length;
 
-        let totalLength = 0;
-        let index = 0;
-        const maxRetrys = 5;
-        let retries = 0;
-
-        while (true) {
-            // If the response is fully printed, break the loop but allow retries
-            if (totalLength === chatResponse.length) {
-                if (retries === maxRetrys) {
-                    process.stdout.write('\n\n');
-                    break;
-                }
-                retries++;
-                await page.waitForTimeout(1000);
-            }
-            else {
-                retries = 0;
-            }
-
-            totalLength = chatResponse.length;
-
-            for (let i = index; i < totalLength; i++) {
-                process.stdout.write(chatResponse[i]);
-                await page.waitForTimeout(5);
-            }
-
-            index = totalLength;
-            chatResponse = await newAssistantElement.innerText();
+        for (let i = chrPtr; i < newLength; i++) {
+            process.stdout.write(chatResponse[i]);
+            await page.waitForTimeout(5);
         }
-    }
-})();
 
+        chrPtr = newLength;
+    }
+}
