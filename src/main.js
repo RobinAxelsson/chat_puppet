@@ -5,9 +5,10 @@ const { chromium } = require('playwright');
 // The chat needs to be initialized manually in the browser, logged in and all that
 
 (async () => {
-    var prompt = await getValidPromptFromInput();
+    const prompt = await getValidPromptFromInput();
+    // var prompt = "test";
     const { page, browser } = await connectToChatGpt();
-    
+
     // the div[data-message-author-role="assistant"] elements are the chat responses
     // we count them to know when a new response is added after we send the prompt
     const initialResponseDivCount = await getInitialResponseDivCount(page);
@@ -68,7 +69,15 @@ async function connectToChatGpt() {
 }
 
 async function getInitialResponseDivCount(page) {
-    const initialResponseDivCount = await page.locator('div[data-message-author-role="assistant"]').count();
+    await page.waitForTimeout(1000);
+    const initialResponseDivs = await page.locator('div[data-message-author-role="assistant"]');
+    let initialResponseDivCount = 0;
+
+    try {
+        initialResponseDivCount = await initialResponseDivs.count();
+    } catch (e) {
+        throw new Error("Failed counting the chat gpt response divs, have the browser got enough of a time out? Use page.waitForTimeout. Inner error message:" + e.message);
+    }
 
     if (typeof initialResponseDivCount !== 'number' || isNaN(initialResponseDivCount) || initialResponseDivCount < 0) {
         throw new Error('initialChatElementCount should be zero or a positive number but got: ' + initialResponseDivCount);
@@ -79,7 +88,7 @@ async function getInitialResponseDivCount(page) {
 async function typePromptIntoChatGptAndPressEnter(prompt, page) {
     const promptDiv = await page.locator('#prompt-textarea');
     await promptDiv.click();
-    await page.keyboard.type(prompt, { delay: 10 });
+    await page.keyboard.type(prompt, { delay: 90 });
     await page.keyboard.press('Enter');
 }
 
@@ -122,10 +131,6 @@ async function printResponseTextToConsoleAlongWithChatGpt(newResponseDiv, page) 
         // - The response is fully printed
         let caughtUpWithResponse = chatResponse.length === chrPtr;
 
-        if (!caughtUpWithResponse) {
-            retrys = 0;
-        }
-
         if (caughtUpWithResponse && retrys > 10) {
             break;
         }
@@ -133,6 +138,10 @@ async function printResponseTextToConsoleAlongWithChatGpt(newResponseDiv, page) 
         if (caughtUpWithResponse) {
             retrys++;
             await page.waitForTimeout(1000);
+        }
+
+        if (!caughtUpWithResponse) {
+            retrys = 0;
         }
 
         chatResponse = await newResponseDiv.innerText();
